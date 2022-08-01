@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FolderMerge.Service", "FolderMergeService\FolderMerge.Service.csproj", "{3898B738-EC13-4336-BD5C-D4E6152E2131}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FolderMerge.Service", "FolderMerge.Service\FolderMerge.Service.csproj", "{3898B738-EC13-4336-BD5C-D4E6152E2131}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FolderMerge.Data", "FolderMergeData\FolderMerge.Data.csproj", "{E4EE963B-6F75-4CD8-ABE0-DB9E73278DE3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FolderMerge.Data", "FolderMerge.Data\FolderMerge.Data.csproj", "{E4EE963B-6F75-4CD8-ABE0-DB9E73278DE3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FolderMerge.Test", "FolderMerge.Test\FolderMerge.Test.csproj", "{3E42B70F-0B55-465F-B063-6833747F2514}"
 EndProject
