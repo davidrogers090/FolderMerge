@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FolderMergeData\FolderMerge.Data.csproj" />
+    <ProjectReference Include="..\FolderMerge.Data\FolderMerge.Data.csproj" />
   </ItemGroup>
 
 </Project>
