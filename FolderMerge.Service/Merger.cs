@@ -4,17 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FolderMerge.Data.Models;
+using FolderMerge.Service.Factories;
+using Microsoft.Extensions.Logging;
 
 namespace FolderMerge.Service
 {
-    public sealed class Merger : IDisposable
+    public sealed class Merger : IMerger
     {
         private readonly Target target;
-        private readonly List<SourceWatcher> watchers = new();
+        private readonly List<ISourceWatcher> watchers = new();
+        private readonly ISourceWatcherFactory watcherFactory;
+        private readonly ILinkerFactory linkerFactory;
+        private readonly ICollisionHandlerFactory collisionHandlerFactory;
+        private readonly ILogger<Merger> logger;
 
-        public Merger(Target target)
+        public Merger(Target target, ISourceWatcherFactory watcherFactory, ILinkerFactory linkerFactory, ICollisionHandlerFactory collisionHandlerFactory, ILogger<Merger> logger)
         {
             this.target = target;
+            this.watcherFactory = watcherFactory;
+            this.linkerFactory = linkerFactory;
+            this.collisionHandlerFactory = collisionHandlerFactory;
+            this.logger = logger;
         }
 
         public void Dispose()
@@ -27,17 +37,17 @@ namespace FolderMerge.Service
 
         public void Init()
         {
-            CollisionHandler collisionHandler = new(target);
+            logger.LogDebug("Initializing Merger on {targetPath}", target.TargetPath);
+            ICollisionHandler collisionHandler = collisionHandlerFactory.CreateCollisionHandler(target);
             foreach (var source in target.Sources)
             {
                 string[] files = Directory.GetFiles(source.Path);
-                Linker linker = new Linker(source, collisionHandler);
+                ILinker linker = linkerFactory.CreateLinker(source, collisionHandler);
                 foreach (var file in files)
                 {
                     linker.Link(file);
                 }
-
-                watchers.Add(new SourceWatcher(source.Path, linker));
+                watchers.Add(watcherFactory.CreateSourceWatcher(source.Path, linker));
             }
         }
 

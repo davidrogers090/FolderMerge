@@ -4,26 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FolderMerge.Data.Models;
+using Microsoft.Extensions.Logging;
 
 namespace FolderMerge.Service
 {
-    public class Linker
+    public class Linker : ILinker
     {
-        private readonly Source source;
-        private CollisionHandler collisionHandler;
+        private readonly Source _source;
+        private readonly ICollisionHandler _collisionHandler;
+        private readonly ILogger<Linker> _logger;
 
-        public Linker(Source source, CollisionHandler collisionHandler)
+        public Linker(Source source, ICollisionHandler collisionHandler, ILogger<Linker> logger)
         {
-            this.source = source;
-            this.collisionHandler = collisionHandler;
+            _source = source;
+            _collisionHandler = collisionHandler;
+            _logger = logger;
         }
 
         public void Delete(string sourcePath)
         {
-            var targetFilename = GetTarget(sourcePath);
-            if (collisionHandler.Owns(source, targetFilename))
+            var targetPath = GetTarget(sourcePath);
+            if (_collisionHandler.Owns(_source, targetPath))
             {
-                File.Delete(targetFilename);
+                _logger.LogTrace("Deleting {target}", targetPath);
+                File.Delete(targetPath);
             }
         }
 
@@ -32,19 +36,25 @@ namespace FolderMerge.Service
             var targetPath = GetTarget(sourcePath);
             if (!File.Exists(targetPath))
             {
+                _logger.LogTrace("Linking {source} to {target}", sourcePath, targetPath);
                 File.CreateSymbolicLink(sourcePath, targetPath);
             }
-            else if (collisionHandler.HasPriority(source, targetPath))
+            else if (_collisionHandler.HasPriority(_source, targetPath))
             {
+                _logger.LogTrace("Overwriting link from {source} to {target}", sourcePath, targetPath);
                 File.Delete(targetPath);
                 File.CreateSymbolicLink(sourcePath, targetPath);
+            }
+            else
+            {
+                _logger.LogTrace("Not Linking {source} to {target}: Has lower priority", sourcePath, targetPath);
             }
         }
 
         private string GetTarget(string sourceFile)
         {
             var filename = Path.GetFileName(sourceFile);
-            var targetFilename = Path.Combine(source.Target.TargetPath, filename);
+            var targetFilename = Path.Combine(_source.Target.TargetPath, filename);
             return targetFilename;
         }
     }

@@ -6,23 +6,27 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
+using System.Data;
+using Microsoft.Extensions.Logging;
 
 namespace FolderMerge.Data
 {
-    public sealed class Database : IDisposable
+    public sealed class Database : IDatabase
     {
         public event EventHandler? OnChange;
 
         private readonly Timer _timer;
-        private readonly DbConnection _connection;
+        private readonly IDbConnection _connection;
+        private readonly ILogger<Database> _database;
 
         private int lastDataVersion = 0;
 
-        public Database(DbConnection connection)
+        public Database(FolderContext context, ILogger<Database> database)
         {
-            _connection = connection;
+            _connection = context.Database.GetDbConnection();
             _connection.Open();
             _timer = new Timer(CheckChanges, null, Timeout.Infinite, Timeout.Infinite);
+            _database = database;
         }
 
         public void StartMonitoring()
@@ -35,10 +39,10 @@ namespace FolderMerge.Data
             using (var command = _connection.CreateCommand())
             {
                 command.CommandText = "PRAGMA data_version";
-                int dataVersion = ((int?)command.ExecuteScalar()).GetValueOrDefault(0);
-                if (dataVersion > lastDataVersion)
+                int? dataVersion = (int?)command.ExecuteScalar();
+                if (dataVersion.HasValue && dataVersion.Value > lastDataVersion)
                 {
-                    lastDataVersion = dataVersion;
+                    lastDataVersion = dataVersion.Value;
                     OnChange?.Invoke(this, EventArgs.Empty);
                 }
             }
