@@ -11,9 +11,11 @@ namespace FolderMerge.Service
 {
     public sealed class MergerStub : IMerger
     {
+        public bool IsDisposed { get; set; }
+
         public void Dispose()
         {
-            throw new NotImplementedException();
+            IsDisposed = true;
         }
 
         public void Init()

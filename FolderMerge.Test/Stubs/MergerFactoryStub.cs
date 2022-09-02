@@ -12,9 +12,14 @@ namespace FolderMerge.Test.Stubs
 {
     public class MergerFactoryStub : IMergerFactory
     {
+        public List<Target> Targets { get; } = new();
+        public List<MergerStub> MergerStubs { get; } = new();
+
         public IMerger CreateMerger(Target target)
         {
-            return new MergerStub();
+            Targets.Add(target);
+            var mergerStub = new MergerStub();
+            return mergerStub;
         }
     }
 }
