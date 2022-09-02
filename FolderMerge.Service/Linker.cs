@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,12 +13,14 @@ namespace FolderMerge.Service
     {
         private readonly Source _source;
         private readonly ICollisionHandler _collisionHandler;
+        private readonly IFileSystem _fileSystem;
         private readonly ILogger<Linker> _logger;
 
-        public Linker(Source source, ICollisionHandler collisionHandler, ILogger<Linker> logger)
+        public Linker(Source source, ICollisionHandler collisionHandler, IFileSystem fileSystem, ILogger<Linker> logger)
         {
             _source = source;
             _collisionHandler = collisionHandler;
+            _fileSystem = fileSystem;
             _logger = logger;
         }
 
@@ -27,23 +30,23 @@ namespace FolderMerge.Service
             if (_collisionHandler.Owns(_source, targetPath))
             {
                 _logger.LogTrace("Deleting {target}", targetPath);
-                File.Delete(targetPath);
+                _fileSystem.File.Delete(targetPath);
             }
         }
 
         public void Link(string sourcePath)
         {
             var targetPath = GetTarget(sourcePath);
-            if (!File.Exists(targetPath))
+            if (!_fileSystem.File.Exists(targetPath))
             {
                 _logger.LogTrace("Linking {source} to {target}", sourcePath, targetPath);
-                File.CreateSymbolicLink(sourcePath, targetPath);
+                _fileSystem.File.CreateSymbolicLink(targetPath, sourcePath);
             }
             else if (_collisionHandler.HasPriority(_source, targetPath))
             {
                 _logger.LogTrace("Overwriting link from {source} to {target}", sourcePath, targetPath);
-                File.Delete(targetPath);
-                File.CreateSymbolicLink(sourcePath, targetPath);
+                _fileSystem.File.Delete(targetPath);
+                _fileSystem.File.CreateSymbolicLink(targetPath, sourcePath);
             }
             else
             {
@@ -53,8 +56,8 @@ namespace FolderMerge.Service
 
         private string GetTarget(string sourceFile)
         {
-            var filename = Path.GetFileName(sourceFile);
-            var targetFilename = Path.Combine(_source.Target.TargetPath, filename);
+            var filename = _fileSystem.Path.GetFileName(sourceFile);
+            var targetFilename = _fileSystem.Path.Combine(_source.Target.TargetPath, filename);
             return targetFilename;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,14 +10,14 @@ namespace FolderMerge.Service
 {
     public sealed class SourceWatcher : ISourceWatcher
     {
-        private readonly FileSystemWatcher fileSystemWatcher;
+        private readonly IFileSystemWatcher fileSystemWatcher;
         private readonly ILinker linker;
         private readonly ILogger<SourceWatcher> logger;
 
-        public SourceWatcher(string sourcePath, ILinker linker, ILogger<SourceWatcher> logger)
+        public SourceWatcher(ILinker linker, IFileSystemWatcher fileSystemWatcher, ILogger<SourceWatcher> logger)
         {
             this.linker = linker;
-            this.fileSystemWatcher = new(sourcePath);
+            this.fileSystemWatcher = fileSystemWatcher;
             this.fileSystemWatcher.Created += File_Created;
             this.fileSystemWatcher.Renamed += File_Renamed;
             this.fileSystemWatcher.Deleted += File_Deleted;

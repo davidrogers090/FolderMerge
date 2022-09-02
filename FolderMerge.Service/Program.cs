@@ -6,6 +6,7 @@ using FolderMerge.Data;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using FolderMerge.Service.Factories;
+using System.IO.Abstractions;
 
 namespace FolderMerge.Service
 {
@@ -40,6 +41,7 @@ namespace FolderMerge.Service
                     .AddSingleton<IMergerFactory, MergerFactory>()
                     .AddSingleton<ISourceWatcherFactory, SourceWatcherFactory>()
                     .AddSingleton<IDatabase, Database>()
+                    .AddSingleton<IFileSystem, FileSystem>()
                     .AddLogging()
                     )
             .Build();

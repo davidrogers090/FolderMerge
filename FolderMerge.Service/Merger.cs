@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,14 +17,16 @@ namespace FolderMerge.Service
         private readonly ISourceWatcherFactory watcherFactory;
         private readonly ILinkerFactory linkerFactory;
         private readonly ICollisionHandlerFactory collisionHandlerFactory;
+        private readonly IFileSystem fileSystem;
         private readonly ILogger<Merger> logger;
 
-        public Merger(Target target, ISourceWatcherFactory watcherFactory, ILinkerFactory linkerFactory, ICollisionHandlerFactory collisionHandlerFactory, ILogger<Merger> logger)
+        public Merger(Target target, ISourceWatcherFactory watcherFactory, ILinkerFactory linkerFactory, ICollisionHandlerFactory collisionHandlerFactory, IFileSystem fileSysteme, ILogger<Merger> logger)
         {
             this.target = target;
             this.watcherFactory = watcherFactory;
             this.linkerFactory = linkerFactory;
             this.collisionHandlerFactory = collisionHandlerFactory;
+            this.fileSystem = fileSysteme;
             this.logger = logger;
         }
 
@@ -41,7 +44,7 @@ namespace FolderMerge.Service
             ICollisionHandler collisionHandler = collisionHandlerFactory.CreateCollisionHandler(target);
             foreach (var source in target.Sources)
             {
-                string[] files = Directory.GetFiles(source.Path);
+                string[] files = fileSystem.Directory.GetFiles(source.Path);
                 ILinker linker = linkerFactory.CreateLinker(source, collisionHandler);
                 foreach (var file in files)
                 {
